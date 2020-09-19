@@ -2,76 +2,78 @@
 require 'rspec'
 
 module Contrato
-  def self.pre(&contenido)
+  attr_accesor :nombre
+  def pre(&contenido)
     self.evaluar &contenido
   end
 
-  def self.post(&contenido)
+  def post(&contenido)
     self.evaluar &contenido
   end
 
-  def self.invariant(&contenido)
+  def invariant(&contenido)
     self.evaluar &contenido
   end
 
-  def self.evaluar (&contenido)
-    puts "evaluando"
-    if(!contenido)
-      self.fallar
+  def evaluar (&contenido)
+    instance_eval(&contenido)
+
+  end
+
+  @fallar = proc {puts 'allahu akbar'}
+
+  def assert(un_booleano)
+    if un_booleano.eql?(false)
+      @fallar.call
     end
+
   end
 
   def fallar
     puts "Cagamos"
   end
 
+  def before_and_after_each_call
+    #Deberia guardarme dos procs para ejecutar antes y despues de cada metodo.
+  end
+
+  def self.method_added(unMetodo)
+    puts "Se agrego metodo #{unMetodo}"
+  end
+
 end
+
+
+
 
 
 class Pila
   include Contrato
-
-  # alias_method :invariant, :invariante
-  # alias_method :pre, :precondicion
-  # alias_method :post, :postcondicion
-
   attr_accessor :current_node, :capacity
 
+  #invariant { capacity >= 0 }
 
+  #post { empty? }
 
-  # def invariant
-  #   self.invariant
-  # end
-  #
-  # def pre
-  #   self.pre
-  # end
-  #
-  # def post
-  #   self.post
-  # end
-  Contrato.invariant { capacity >= 0 }
-
-  Contrato.post { empty? }
   def initialize(capacity)
     @capacity = capacity
     @current_node = nil
   end
 
-  Contrato.pre { !full? }
-  Contrato.post { height.positive? }
+  # pre { !full? }
+  #post { height > 0 }
   def push(element)
     @current_node = Node.new(element, current_node)
   end
 
-  Contrato.pre { !empty? }
+  #pre { !empty? }
   def pop
     element = top
     @current_node = @current_node.next_node
     element
   end
 
-  Contrato.pre { !empty? }
+  #pre { !empty? }
   def top
     current_node.element
   end
@@ -94,3 +96,46 @@ class Pila
     end
   end
 end
+
+
+#
+# def self.method_added(metodo_a_sobreescribir)
+#   puts "Estoy agregando #{metodo_a_sobreescribir}"
+#   # quiero sobreescribir el codigo de la funcion
+#   metodo_a_sobreescribir.instance_eval do
+#     # agrego la pre condicion al codigo
+#     self.pre
+#     super
+#     # agrego la post condicion al codigo
+#     self.post
+#   end
+
+# def self.invariant(name, type)
+#
+#   define_method(name) do
+#     instance_variable_get("@#{name}")
+#   end
+#
+#   define_method("#{name}=") do |value|
+#     if value.is_a? type and value >=0
+#       instance_variable_set("@#{name}", value)
+#     else
+#       raise ArgumentError.new("Invalid Type")
+#     end
+#   end
+# end
+#
+# invariant :capacity, Integer
+
+# def self.method_added(sym)
+#
+#   self.define_
+#
+#   def sym
+#
+#     before.call
+#     sym
+#     after.call
+#
+#   end
+# end
