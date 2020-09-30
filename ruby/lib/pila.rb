@@ -1,79 +1,31 @@
 #require_relative 'contratos'
-require 'rspec'
-
-module Contrato
-  attr_accesor :nombre
-  def pre(&contenido)
-    self.evaluar &contenido
-  end
-
-  def post(&contenido)
-    self.evaluar &contenido
-  end
-
-  def invariant(&contenido)
-    self.evaluar &contenido
-  end
-
-  def evaluar (&contenido)
-    instance_eval(&contenido)
-
-  end
-
-  @fallar = proc {puts 'allahu akbar'}
-
-  def assert(un_booleano)
-    if un_booleano.eql?(false)
-      @fallar.call
-    end
-
-  end
-
-  def fallar
-    puts "Cagamos"
-  end
-
-  def before_and_after_each_call
-    #Deberia guardarme dos procs para ejecutar antes y despues de cada metodo.
-  end
-
-  def self.method_added(unMetodo)
-    puts "Se agrego metodo #{unMetodo}"
-  end
-
-end
-
-
-
-
+require_relative 'contratos.rb'
 
 class Pila
-  include Contrato
   attr_accessor :current_node, :capacity
 
-  #invariant { capacity >= 0 }
+  invariant { capacity >= 0 }
 
-  #post { empty? }
-
+  post { empty? }
   def initialize(capacity)
     @capacity = capacity
     @current_node = nil
   end
 
-  # pre { !full? }
-  #post { height > 0 }
+  pre { !full? }
+  post { height > 0 }
   def push(element)
     @current_node = Node.new(element, current_node)
   end
 
-  #pre { !empty? }
+  pre { !empty? }
   def pop
     element = top
     @current_node = @current_node.next_node
     element
   end
 
-  #pre { !empty? }
+  pre { !empty? }
   def top
     current_node.element
   end
