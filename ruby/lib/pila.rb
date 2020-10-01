@@ -5,6 +5,7 @@ class Pila
   attr_accessor :current_node, :capacity
 
   invariant { capacity >= 0 }
+  invariant { height <= capacity}
 
   post { empty? }
   def initialize(capacity)
@@ -13,7 +14,7 @@ class Pila
   end
 
   pre { !full? }
-  post { height > 0 }
+  #post { height > 0 }
   def push(element)
     @current_node = Node.new(element, current_node)
   end
@@ -61,33 +62,3 @@ end
 #     # agrego la post condicion al codigo
 #     self.post
 #   end
-
-# def self.invariant(name, type)
-#
-#   define_method(name) do
-#     instance_variable_get("@#{name}")
-#   end
-#
-#   define_method("#{name}=") do |value|
-#     if value.is_a? type and value >=0
-#       instance_variable_set("@#{name}", value)
-#     else
-#       raise ArgumentError.new("Invalid Type")
-#     end
-#   end
-# end
-#
-# invariant :capacity, Integer
-
-# def self.method_added(sym)
-#
-#   self.define_
-#
-#   def sym
-#
-#     before.call
-#     sym
-#     after.call
-#
-#   end
-# end
