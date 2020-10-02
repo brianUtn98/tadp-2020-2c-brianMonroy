@@ -1,12 +1,34 @@
-#require_relative 'contratos'
 require_relative 'contratos.rb'
+
+class Object
+  include Wrapper
+
+
+  def self.attr_reader(*sym)
+      send(:agregar_getters, sym)
+      super
+    end
+
+  def self.attr_accessor(*sym)
+      send(:agregar_getters, sym)
+      super
+    end
+
+
+  def self.method_added(sym)
+    return if @flag
+    @flag = true
+    redefinir_metodo sym
+    @flag = false
+  end
+end
+
 
 class Pila
   attr_accessor :current_node, :capacity
 
   invariant { capacity >= 0 }
-  invariant { height <= capacity}
-
+  #invariant { capacity >= height }
   post { empty? }
   def initialize(capacity)
     @capacity = capacity
@@ -14,7 +36,7 @@ class Pila
   end
 
   pre { !full? }
-  #post { height > 0 }
+  post { height.positive? }
   def push(element)
     @current_node = Node.new(element, current_node)
   end
@@ -50,15 +72,72 @@ class Pila
   end
 end
 
+class Guerrero
 
+  attr_accessor :vida, :fuerza
+
+  def initialize vida,fuerza
+    @vida = vida
+    @fuerza = fuerza
+  end
+  invariant { vida >= 0 }
+  invariant { fuerza.positive? && fuerza < 100 }
+
+
+  def atacar(otro)
+    otro.vida -= fuerza
+  end
+
+  def bajar unidades
+    self.vida -= unidades
+  end
+
+end
+
+class Golondrina
+
+  attr_reader :energia, :cansada
+  invariant { energia >= 0}
+  def initialize energia
+    @energia = energia
+    @cansada = false
+  end
+
+  pre { !cansada }
+  post{ cansada }
+  def volar kms
+    @energia -= kms
+    @cansada = true
+  end
+
+  def energia
+    @energia
+  end
+
+  post{ !cansada }
+  def cansada
+    @cansada
+  end
+
+  post{ energia > 0 }
+  def comer grs
+    self.energia += grs * 10
+    @cansada = false
+  end
+
+end
+
+
+# pila = Pila.new 2
+# pila.push 1
 #
-# def self.method_added(metodo_a_sobreescribir)
-#   puts "Estoy agregando #{metodo_a_sobreescribir}"
-#   # quiero sobreescribir el codigo de la funcion
-#   metodo_a_sobreescribir.instance_eval do
-#     # agrego la pre condicion al codigo
-#     self.pre
-#     super
-#     # agrego la post condicion al codigo
-#     self.post
-#   end
+# pila.push 1
+# pila.push 2
+# pila.push 3
+#
+# marine = Guerrero.new 100,50
+# marine.bajar 101
+#
+# pepita = Golondrina.new 100
+# pepita.volar 200
+
