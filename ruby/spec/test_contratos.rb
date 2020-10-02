@@ -1,28 +1,17 @@
-# describe Prueba do
-#   let(:contrato) { Contrato.new }
-#
-#   describe '' do
-#     it '' do
-#       expect(contrato.get_property(:energia)).to raise_error(PropertyNotFound)
-#     end
-#
-#     it '' do
-#       contracto.set_property(:id, 100)
-#       expect(contrato.id).to eq 100
-#       expect(contrato.respond_to?(:id)).to be(true)
-#     end
-#
-#     it '' do
-#       contrato.set_property(:saludar, proc {'hola'})
-#       expect(contrato.saludar).to eq('hola')
-#     end
-#
-#     it '' do
-#       contrato1.set_property(:nombre, 'Pepe')
-#       contrato1.set_property(:saludar, proc do |nombre_saludador| "Hola #{nombre_saludador}, soy #{nombre}"end)
-#       expect(contrato.saludar('Juan')).to eq('Hola Juan, soy Pepe')
-#     end
-#   end
-# end
-#
+# frozen_string_literal: true
+require 'rspec'
+require_relative '../lib/pila'
+
+describe 'Contratos' do
+  before do
+    @pepita = Golondrina.new 100
+  end
+
+  describe 'contratos con pepita' do
+    it 'pepita no puede volar mas de lo que su energia le permite' do
+      expect(@pepita.volar(200)).to raise_error(Exception)
+    end
+  end
+end
+
 
