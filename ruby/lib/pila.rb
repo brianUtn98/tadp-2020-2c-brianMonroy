@@ -128,12 +128,12 @@ class Golondrina
 end
 
 
-# pila = Pila.new 2
-# pila.push 1
-#
-# pila.push 1
-# pila.push 2
-# pila.push 3
+pila = Pila.new -2
+pila.push 1
+
+pila.push 1
+pila.push 2
+pila.push 3
 #
 # marine = Guerrero.new 100,50
 # marine.bajar 101
