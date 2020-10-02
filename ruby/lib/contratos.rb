@@ -13,33 +13,34 @@ class Prototipo
     self.prototipo
   end
 
-  # def set_property(sym, value)
-  #   unless self.prototype.respond_to? sym
-  #     self.singleton_class.send :attr_accessor, sym
-  #     self.send "#{sym}=", value
-  #   end
-  # end
-  #
-  # def set_method(sym, block)
-  #   self.define_singleton_method sym, block
-  # end
-  #
-  # def set_prototype(proto)
-  #   self.prototype = proto
-  # end
-  #
-  # def respond_to_missing?(sym, include_all = true)
-  #   super(sym, include_all) or self.prototype.respond_to? sym
-  # end
-  #
-  # def method_missing(sym, *args)
-  #   super unless self.respond_to? sym
-  #   # method = self.prototype.method(sym).unbind
-  #   # method.bind(self).call *args
-  #   self.prototype.send(sym, *args)
-  # end
+  def set_property(sym, value)
+    unless self.prototype.respond_to? sym
+      self.singleton_class.send :attr_accessor, sym
+      self.send "#{sym}=", value
+    end
+  end
+
+  def set_method(sym, block)
+    self.define_singleton_method sym, block
+  end
+
+  def set_prototype(proto)
+    self.prototype = proto
+  end
+
+  def respond_to_missing?(sym, include_all = true)
+    super(sym, include_all) or self.prototype.respond_to? sym
+  end
+
+  def method_missing(sym, *args)
+    super unless self.respond_to? sym
+    # method = self.prototype.method(sym).unbind
+    # method.bind(self).call *args
+    self.prototype.send(sym, *args)
+  end
 end
 
+# Codigo de migue
 # module BeforeAndAfter
 #
 #   def method_added(name)
@@ -108,8 +109,7 @@ module Condiciones
     puts 'Agregado un post'
     self
     post_block = proc {raise Error("No se cumple la post-condicion") unless self.instance_eval(block)}
-    post_blocks.push(post_block
-    )
+    post_blocks.push(post_block)
   end
 end
 
@@ -129,100 +129,145 @@ module InvariantModule
     puts "Controlando invariantes en instancia #{contexto}"
     invariantes.each do |invariante|
       puts "Evaluando invariante en #{contexto}"
-      raise Exception.new("No se cumplieron las invariantes") unless contexto.instance_eval(&invariante)
+      raise Exception, "No se cumplieron las invariantes" unless contexto.instance_eval(&invariante)
     end
   end
 end
 
-module BeforeAndAfterModule
+# module BeforeAndAfterModule
+#
+#   def before_blocks
+#     @before_blocks ||= []
+#   end
+#
+#   def after_blocks
+#     @after_blocks ||= []
+#   end
+#
+#   def before_and_after_each_call(before,after)
+#     self.before_blocks.push(before)
+#     self.after_blocks.push(after)
+#   end
+#
+# end
 
-  def before_blocks
-    @before_blocks ||= []
-  end
+# module BeforeAndAfter
+#   include InvariantModule
+#   @before = nil
+#   @after = nil
+#   class << self
+#     attr_accessor :before, :after
+#   end
+#
+#   def before_and_after_each_call(before = proc {},after = proc {})
+#     @before = before
+#     @after = after
+#   end
+#
+#   def method_added(sym)
+#     return if @working
+#
+#     metodo_original = instance_method(method_name)
+#
+#     @working = true
+#     proc_antes = @before
+#     proc_despues = @after
+#     define_method(sym) do
+#       proc_antes.call
+#       resultado = metodo_original.bind(self).call
+#       resultado
+#       self.class.send(:controlarInvariants,self)
+#       proc_despues.call
+#     end
+#     @working = false
+#   end
+#
+#   def pre(&before)
+#     @before = proc {|contexto|
+#                 unless contexto.instance_eval(&before)
+#                   raise Error("No se cumplio la pre-condicion del metodo")
+#                                end}
+#   end
+#
+#   def post(&after)
+#     @after = proc {|contexto|
+#                unless contexto.instance_eval(&after)
+#                  raise Error("No se cumplio la post-condicion del metodo")
+#                               end}
+#   end
+#
+# end
 
-  def after_blocks
-    @after_blocks ||= []
-  end
-
-  def before_and_after_each_call(before,after)
-    self.before_blocks.push(before)
-    self.after_blocks.push(after)
-  end
-
-
-
-
-end
-
-module BeforeAndAfter
+module Redefinicion
   include InvariantModule
-  @before = nil
-  @after = nil
+
+
+  # def self.included base
+  #   base.extend(InvariantModule)
+  # end
+
   class << self
     attr_accessor :before, :after
   end
+
+  @before = nil
+  @after = nil
 
   def before_and_after_each_call(before = proc {},after = proc {})
     @before = before
     @after = after
   end
 
-  def method_added(sym)
-    return if @working
-
-    metodo_original = instance_method(method_name)
-
-    @working = true
-    proc_antes = @before
-    proc_despues = @after
-    define_method(sym) do
-      proc_antes.call
-      resultado = metodo_original.bind(self).call
-      resultado
-      self.class.send(:controlarInvariants,self)
-      proc_despues.call
-    end
-    @working = false
+  def after
+    @after
   end
 
-  def pre(&before)
-    @before = before
+  def before
+    @before
   end
-  def post(&after)
-    @after = after
-  end
-end
+  #include BeforeAndAfterModule
 
-module Redefinicion
-  include InvariantModule
-  include BeforeAndAfterModule
-  include Condiciones
   protected def contexto_metodo (metodo,argumentos)
     Prototipo.new self
   end
+
+  protected def ejecutar_pre(contexto)
+    #return if before == nil
+    before.call(contexto)
+  end
+
+  protected def ejecutar_post(contexto)
+    #return if after == nil
+    after.call(contexto)
+
+  end
+
+
 
   @tarea_realizada = nil
 
   protected def redefinir_metodo sym
     getters = self.send(:getters)
     metodos_reservados = self.send(:metodos_reservados)
-    if @tarea_realizada == sym or self.is_a? Prototipo or (metodos_reservados + getters).include? sym
-      return
-    end
+    return if @tarea_realizada == sym or self.is_a? Prototipo or (metodos_reservados + getters).include? sym
+
     self.redifinir_privado sym
 
   end
 
   protected def redifinir_privado sym
+    return if @working
+
     @tarea_realizada = sym
 
     metodo_original = self.instance_method(sym)
 
+
+
     self.define_method(sym) do |*argumentos|
 
+      #@working = true
       contexto = contexto_metodo metodo_original,argumentos
-
-      # agregar before
 
       puts "Redefiniendo metodo #{sym} en #{self}"
 
@@ -230,9 +275,15 @@ module Redefinicion
 
       self.class.send(:controlarInvariants, contexto.contexto)
 
-      # agregar after
+      self.class.send(:ejecutar_pre,contexto.contexto)
+
       resultado
+
+      self.class.send(:ejecutar_post,contexto.contexto)
+      #self.class.after.call(contexto.contexto)
     end
+
+    #@working = false
 
     @tarea_realizada = nil
   end
@@ -242,20 +293,25 @@ module Redefinicion
     @getters
   end
 
-  private def agregar_getters(method_names)
-    @getters = self.send(:getters) + method_names
+  private def agregar_getters(metodo)
+    @getters = self.send(:getters) + metodo
   end
 
   private def metodos_reservados
     [:irb_binding]
   end
-end
 
+  def pre(&before)
+    puts 'Definido un pre'
+    @before = proc {|contexto| raise Exception, "No se cumplio la pre-condicion del metodo" unless contexto.instance_eval(&before)}
+  end
 
+  def post(&after)
+    puts 'Definido un post'
+    @after = proc{|contexto| raise Exception,"No se cumplio la post-condicion del metodo" unless contexto.instance_eval(&after)}
+  end
 
-module Wrapper
-  include Redefinicion
-end
+  end
 
 
 
