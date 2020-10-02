@@ -40,6 +40,52 @@ class Prototipo
   # end
 end
 
+# module BeforeAndAfter
+#
+#   def method_added(name)
+#     @methods ||= []
+#     return if @methods.include?(name)
+#     @methods << name
+#
+#     meth = instance_method(name)
+#
+#     @before_hook ||= proc { |_meth_name, *_args| raise 'No hook defined!' }
+#     @after_hook ||= proc { |_meth_name, *_args| raise 'No hook defined!' }
+#
+#     before_hook = @before_hook
+#     after_hook = @after_hook
+#
+#     define_method(name) do |*args, &block|
+#       before_hook.call(name, *args)
+#
+#       result = meth.bind(self).call(*args, &block)
+#
+#       after_hook.call(result)
+#     end
+#   end
+#
+#   def before(&blk)
+#     @before_hook = blk
+#   end
+#
+#   def after(&blk)
+#     @after_hook = blk
+#   end
+#
+#   def before_and_after_each_call(before=proc{}, after=proc{})
+#     @before_hook = before
+#     @after_hook = after
+#   end
+#
+#   def pre(&before)
+#     @before_hook = before
+#   end
+#
+#   def post(&after)
+#     @after_hook = after
+#   end
+# end
+
 module Condiciones
   def pre_blocks
     @pre_blocks ||= []
@@ -104,6 +150,47 @@ module BeforeAndAfterModule
   end
 
 
+
+
+end
+
+module BeforeAndAfter
+  include InvariantModule
+  @before = nil
+  @after = nil
+  class << self
+    attr_accessor :before, :after
+  end
+
+  def before_and_after_each_call(before = proc {},after = proc {})
+    @before = before
+    @after = after
+  end
+
+  def method_added(sym)
+    return if @working
+
+    metodo_original = instance_method(method_name)
+
+    @working = true
+    proc_antes = @before
+    proc_despues = @after
+    define_method(sym) do
+      proc_antes.call
+      resultado = metodo_original.bind(self).call
+      resultado
+      self.class.send(:controlarInvariants,self)
+      proc_despues.call
+    end
+    @working = false
+  end
+
+  def pre(&before)
+    @before = before
+  end
+  def post(&after)
+    @after = after
+  end
 end
 
 module Redefinicion
