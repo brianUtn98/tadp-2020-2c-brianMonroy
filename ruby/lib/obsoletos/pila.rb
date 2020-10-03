@@ -1,4 +1,4 @@
-require_relative 'contratos.rb'
+require_relative 'obsoletos/rb.rb'
 
 class Object
   include Redefinicion
@@ -16,6 +16,9 @@ class Object
 
 
   def self.method_added(sym)
+    if sym == :obtenerInvariants or sym == :pre or sym == post
+      return
+    end
     #return if @flag
     #@flag = true
     redefinir_metodo sym
@@ -129,15 +132,15 @@ end
 
 
 pila = Pila.new 2
-# pila.push 1
-#
-# pila.push 1
-# pila.push 2
-# pila.push 3
-#
-# marine = Guerrero.new 100,50
-# marine.bajar 101
-#
-# pepita = Golondrina.new 100
-# pepita.volar 200
+pila.push 1
+
+pila.push 1
+pila.push 2
+pila.push 3
+
+marine = Guerrero.new 100,50
+marine.bajar 101
+
+pepita = Golondrina.new 100
+pepita.volar 200
 

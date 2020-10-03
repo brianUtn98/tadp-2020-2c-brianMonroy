@@ -234,6 +234,7 @@ module Redefinicion
   protected def ejecutar_pre(contexto)
     #return if before == nil
     before.call(contexto)
+    #contexto.instance_eval(&before)
   end
 
   protected def ejecutar_post(contexto)
@@ -266,7 +267,7 @@ module Redefinicion
 
     self.define_method(sym) do |*argumentos|
 
-      #@working = true
+      @working = true
       contexto = contexto_metodo metodo_original,argumentos
 
       puts "Redefiniendo metodo #{sym} en #{self}"
@@ -277,13 +278,15 @@ module Redefinicion
 
       self.class.send(:ejecutar_pre,contexto.contexto)
 
+      self.class.send(:ejecutar_post,contexto.contexto)
+
       resultado
 
-      self.class.send(:ejecutar_post,contexto.contexto)
+      #self.class.send(:ejecutar_post,contexto.contexto)
       #self.class.after.call(contexto.contexto)
     end
 
-    #@working = false
+    @working = false
 
     @tarea_realizada = nil
   end

@@ -90,11 +90,13 @@ module Redefinicion
   end
 
   protected def ejecutar_pre(contexto)
-    before.call(contexto)
+    return if before == nil
+    before.instance_eval(contexto)
   end
 
   protected def ejecutar_post(contexto)
-    after.call(contexto)
+    return if after == nil
+    after.instance_eval(contexto)
 
   end
 
@@ -125,6 +127,29 @@ module Redefinicion
 
       self.class.send(:ejecutar_post,contexto.contexto)
     end
+  end
+
+  private def getters
+    @getters ||= []
+    @getters
+  end
+
+  private def agregar_getters(metodo)
+    @getters = self.send(:getters) + metodo
+  end
+
+  private def metodos_reservados
+    [:irb_binding]
+  end
+
+  def pre(&before)
+    puts 'Definido un pre'
+    @before = proc {|contexto| raise Exception, "No se cumplio la pre-condicion del metodo" unless contexto.instance_eval(&before)}
+  end
+
+  def post(&after)
+    puts 'Definido un post'
+    @after = proc{|contexto| raise Exception,"No se cumplio la post-condicion del metodo" unless contexto.instance_eval(&after)}
   end
 
 
