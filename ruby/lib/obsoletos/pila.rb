@@ -1,7 +1,7 @@
-require_relative 'contratos.rb'
+require_relative 'obsoletos/rb.rb'
 
 class Object
-  include Wrapper
+  include Redefinicion
 
 
   def self.attr_reader(*sym)
@@ -16,10 +16,13 @@ class Object
 
 
   def self.method_added(sym)
-    return if @flag
-    @flag = true
+    if sym == :obtenerInvariants or sym == :pre or sym == post
+      return
+    end
+    #return if @flag
+    #@flag = true
     redefinir_metodo sym
-    @flag = false
+    #@flag = false
   end
 end
 
@@ -28,7 +31,7 @@ class Pila
   attr_accessor :current_node, :capacity
 
   invariant { capacity >= 0 }
-  #invariant { capacity >= height }
+
   post { empty? }
   def initialize(capacity)
     @capacity = capacity
@@ -128,16 +131,16 @@ class Golondrina
 end
 
 
-pila = Pila.new -2
+pila = Pila.new 2
 pila.push 1
 
 pila.push 1
 pila.push 2
 pila.push 3
-#
-# marine = Guerrero.new 100,50
-# marine.bajar 101
-#
-# pepita = Golondrina.new 100
-# pepita.volar 200
+
+marine = Guerrero.new 100,50
+marine.bajar 101
+
+pepita = Golondrina.new 100
+pepita.volar 200
 
