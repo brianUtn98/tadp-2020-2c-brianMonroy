@@ -40,21 +40,11 @@ module BeforeAndAfter
 
     define_method(sym) do |*argumentos|
 
-      if sym == :initialize
-        #bindeo el metodo para poder llamarlo
-        resultado = original_method.bind(self).call(*argumentos)
-        proc_invariants.each do |oneInvariant|
-          #puts invariant.to_source(strip_enclosure: true)
-          raise "No se cumplio la invariante" unless instance_eval(&oneInvariant)
-        end
-
-        resultado
-
-      end
       raise "No se cumplio la pre-condicion" unless instance_eval(&proc_before)
 
       resultado = original_method.bind(self).call(*argumentos)
 
+      # TODO las invariantes hay que pedirlas en el momento para contemplar nuevas.
       proc_invariants.each do |oneInvariant|
         raise "No se cumplio la invariante" unless instance_eval(&oneInvariant)
       end
@@ -66,7 +56,8 @@ module BeforeAndAfter
     proc_limpieza = proc { true }
     @before = proc_limpieza
     @after = proc_limpieza
-    @working = false  end
+    @working = false
+  end
 
   def before_and_after_each_call(before = proc{},after = proc{})
     @before = before
