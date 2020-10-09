@@ -1,41 +1,34 @@
-# frozen_string_literal: true
 require 'rspec'
-require_relative '../lib/contract_framework'
-#
-# describe 'Contratos' do
-#   before do
-#     pila = Pila.new 2
-#     pila.push 1
-#     pila.push 2
-#    end
-#
-#   describe 'contratos en la pila' do
-#     it 'la pila no puede agregar mas elementos que su capacidad' do
-#       expect(pila.push 3).to raise("No se cumplio la pre-condicion")
-#     end
-#
-#     it '' do
-#       expect(3).eql? 3
-#     end
-#   end
-# end
+require_relative '../lib/main'
 
-describe 'Test contract_framework con la pila' do
+
+### Errores para Copiar en los spec
+#
+# Invariant:
+# No se cumplio la invariante
+#
+# Pre:
+# No se cumplio la pre-condicion
+#
+# Post:
+# No se cumplio la post-condicion
+
+describe 'un test' do
 
   before do
-    pila = Pila.new 2
-    pila.push 1
-    pila.push 2
+    @pila = Pila.new (2)
+    @pila.push 2
+    @pila.push 3
   end
 
-  # it 'la pila no deberia poder hacer push de un elemento si esta llena' do
-  #   expect(pila.push 3).to raise "No se cumplio la pre-condicion"
-  # end
-  #
-  it 'pruebita' do
-    expect (3).eql? 3
+  it 'deberia tirar error de pre-condicion al hacer push' do
+
+    expect(@pila.push 4).to raise_error("No se cumplio la pre-condicion")
+
+  end
+
+  it 'deberia tirar error de invariant al crear una pila con capacidad negativa' do
+    expect(@pila2 = Pila.new(-2)).to raise_error( "No se cumplio la invariante")
   end
 
 end
-
-
