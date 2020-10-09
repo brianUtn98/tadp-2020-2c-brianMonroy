@@ -109,28 +109,4 @@ class Golondrina
   end
 
 end
-#
 
-pila = Pila.new 2
-pila.push 1
-
-
-pepita = Golondrina.new 100
-pepita.volar 101
-#
-# pepita = Golondrina.new 100
-# pepita.volar 101
-
-# Ejemplo de uso
-# class miClase
-# attr_accesor :atribuo1,atributo2,...
-#
-# include Contrato
-#   invariant { una invariante }
-#   pre { una pre condicion }
-#   post {una post condicion}
-#   def metodo
-#   definicion del metodo
-#   end
-# ...
-# end
