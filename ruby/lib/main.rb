@@ -110,3 +110,8 @@ class Golondrina
   end
 
 end
+
+# pila = Pila.new 2
+# pila.push 1
+# pila.push 2
+# pila.push 3 # aca tiene que tirar exception
