@@ -13,7 +13,7 @@ require_relative '../lib/main'
 # Post:
 # No se cumplio la post-condicion
 
-describe 'un test' do
+describe 'test con la pila' do
 
   before do
     @pila = Pila.new (2)
