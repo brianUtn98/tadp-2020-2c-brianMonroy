@@ -40,7 +40,9 @@ module BeforeAndAfter
 
     define_method(sym) do |*argumentos|
 
-      raise "No se cumplio la pre-condicion" unless instance_eval(&proc_before)
+      unless @before
+        raise "No se cumplio la pre-condicion" unless instance_eval(&proc_before)
+      end
 
       resultado = original_method.bind(self).call(*argumentos)
 
@@ -49,13 +51,14 @@ module BeforeAndAfter
         raise "No se cumplio la invariante" unless instance_eval(&oneInvariant)
       end
 
-      raise "No se cumplio la post-condicion" unless instance_eval(&proc_after)
+      unless @after
+        raise "No se cumplio la post-condicion" unless instance_eval(&proc_after)
+      end
       resultado
 
     end
-    proc_limpieza = proc { true }
-    @before = proc_limpieza
-    @after = proc_limpieza
+    @before = nil
+    @after = nil
     @working = false
   end
 
@@ -65,7 +68,7 @@ module BeforeAndAfter
   end
 
   def invariant(&block)
-    puts "Agregando una invariant"
+    #puts "Agregando una invariant"
     @invariants ||= []
     @invariants << block
   end
