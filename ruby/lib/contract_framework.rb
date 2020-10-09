@@ -1,5 +1,8 @@
 require 'rspec'
 
+
+
+
 module Contrato
 
   def self.included(base)
@@ -97,3 +100,5 @@ module BeforeAndAfter
   end
 
 end
+
+

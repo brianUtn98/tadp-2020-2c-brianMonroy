@@ -1,5 +1,6 @@
 require_relative 'contract_framework'
 
+
 class Pila
   attr_accessor :current_node, :capacity
 
@@ -83,7 +84,7 @@ class Golondrina
 
   attr_accessor :energia, :cansada
   include Contrato
-  invariant { energia >= 0}
+   invariant { energia >= 0}
   def initialize energia
     @energia = energia
     @cansada = false
@@ -109,4 +110,3 @@ class Golondrina
   end
 
 end
-
