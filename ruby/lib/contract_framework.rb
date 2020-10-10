@@ -3,6 +3,24 @@ require 'rspec'
 
 
 
+class InvariantError < StandardError
+  def initialize(sym)
+    super "No se cumplio una invariante en el metodo #{sym}"
+  end
+end
+
+class PreConditionError < StandardError
+  def initialize(sym)
+    super "No se cumplio la pre-condicion en el metodo #{sym}"
+  end
+end
+
+class PostConditionError < StandardError
+  def initialize(sym)
+    super "No se cumplio la post-condicion en el metodo #{sym}"
+  end
+end
+
 module Contrato
 
   def self.included(base)
@@ -16,13 +34,15 @@ end
 module BeforeAndAfter
 
   #before y after comienzan en nul, seran seteadas por before_and_after_each_call , pre y post.
+
+
   @before = nil
   @after = nil
-
   #defino before and after, como metodos de clase
   class << self
-    attr_reader :before,:after
+    attr_reader :before , :after
   end
+
 
   def method_added(sym)
     return if @working
@@ -41,18 +61,20 @@ module BeforeAndAfter
     define_method(sym) do |*argumentos|
 
       unless @before
-        raise "No se cumplio la pre-condicion" unless instance_eval(&proc_before)
+        raise PreConditionError.new(sym) unless instance_eval(&proc_before)
       end
 
       resultado = original_method.bind(self).call(*argumentos)
 
       # TODO las invariantes hay que pedirlas en el momento para contemplar nuevas.
       proc_invariants.each do |oneInvariant|
-        raise "No se cumplio la invariante" unless instance_eval(&oneInvariant)
+        unless oneInvariant
+          raise InvariantError.new(sym) unless instance_eval(&oneInvariant)
+        end
       end
 
       unless @after
-        raise "No se cumplio la post-condicion" unless instance_eval(&proc_after)
+        raise PostConditionError.new(sym) unless instance_eval(&proc_after)
       end
       resultado
 

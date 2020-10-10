@@ -74,9 +74,9 @@ class Guerrero
   end
 
 
-  def bajar unidades
-    self.vida -= unidades
-  end
+ #  def bajar unidades
+ #    self.vida -= unidades
+ #  end
 
 end
 
@@ -96,10 +96,6 @@ class Golondrina
     self.energia -= kms
     self.cansada = true
   end
-  #
-  # def energia
-  #   @energia
-  # end
 
 
 
@@ -111,9 +107,10 @@ class Golondrina
 
 end
 
-pila = Pila.new 2
-pila.push 1
-pila.push 2
-pila.pop
-pila.pop
-pila.pop
+#
+# pila = Pila.new 2
+# pila.push 1
+# pila.push 2
+# pila.pop
+# pila.pop
+# pila.pop
