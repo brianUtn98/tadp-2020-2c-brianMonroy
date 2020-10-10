@@ -1,25 +1,10 @@
 require 'rspec'
+require_relative 'errores'
 
 
 
 
-class InvariantError < StandardError
-  def initialize(sym)
-    super "No se cumplio una invariante en el metodo #{sym}"
-  end
-end
-
-class PreConditionError < StandardError
-  def initialize(sym)
-    super "No se cumplio la pre-condicion en el metodo #{sym}"
-  end
-end
-
-class PostConditionError < StandardError
-  def initialize(sym)
-    super "No se cumplio la post-condicion en el metodo #{sym}"
-  end
-end
+# TODO sacarme este pasamanos
 
 module Contrato
 
@@ -113,6 +98,24 @@ module BeforeAndAfter
 
   def after
     @after ||= proc { true }
+  end
+
+  def decored_methods
+    @decored_methods
+  end
+
+  def add_decorated_method method
+    @decored_methods ||= []
+    @decored_methods.push method
+  end
+
+  def original_methods
+    @original_methods
+  end
+
+  def add_original_method method
+    @original_methods ||= []
+    @original_methods.push method
   end
 
 end

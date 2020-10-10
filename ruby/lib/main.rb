@@ -107,10 +107,10 @@ class Golondrina
 
 end
 
-#
-# pila = Pila.new 2
-# pila.push 1
-# pila.push 2
-# pila.pop
-# pila.pop
-# pila.pop
+
+pila = Pila.new 2
+pila.push 1
+pila.push 2
+pila.pop
+pila.pop
+pila.pop
