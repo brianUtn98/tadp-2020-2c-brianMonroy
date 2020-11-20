@@ -1,3 +1,3 @@
 require 'rspec'
 
-require_relative '../lib/obsoletos/prueba'
+require_relative '../lib/main'

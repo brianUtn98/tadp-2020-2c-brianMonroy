@@ -70,9 +70,12 @@ class Guerrero
 
 
   def atacar(otro)
-    otro.vida -= fuerza
+    otro.bajarVida @fuerza
   end
 
+  def bajarVida cuanto
+    @vida -= cuanto
+  end
 
  #  def bajar unidades
  #    self.vida -= unidades
@@ -107,10 +110,12 @@ class Golondrina
 
 end
 
+# unGuerrero = Guerrero.new 100,90
+# otroGuerrero = Guerrero.new 1, 10
+# unGuerrero.atacar otroGuerrero
+#
+pila = Pila.new 100
 
-pila = Pila.new 2
-pila.push 1
-pila.push 2
-pila.pop
-pila.pop
-pila.pop
+
+
+pila.push 3

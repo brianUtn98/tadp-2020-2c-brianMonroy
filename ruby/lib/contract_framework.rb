@@ -30,9 +30,16 @@ module BeforeAndAfter
 
 
   def method_added(sym)
-    return if @working
+
+    # if decored_methods.include? sym
+    #   puts 'Este metodo ya fue decorado'
+    # end
+
+    return if @working #or decored_methods.include? sym
 
     original_method = instance_method(sym)
+
+    # add_original_method(original_method)
 
     @working = true
 
@@ -44,25 +51,24 @@ module BeforeAndAfter
 
 
     define_method(sym) do |*argumentos|
-
       unless @before
-        raise PreConditionError.new(sym) unless instance_eval(&proc_before)
+        raise "Error de Pre-Condicion en #{self}:#{sym}" unless instance_eval(&proc_before)
       end
 
       resultado = original_method.bind(self).call(*argumentos)
 
       # TODO las invariantes hay que pedirlas en el momento para contemplar nuevas.
-      proc_invariants.each do |oneInvariant|
-        unless oneInvariant
-          raise InvariantError.new(sym) unless instance_eval(&oneInvariant)
-        end
+      self.class.invariants.each do |oneInvariant|
+        #puts invariant.to_source(strip_enclosure: true)
+        raise "No se cumplio la invariante" unless instance_eval(&oneInvariant)
       end
 
       unless @after
-        raise PostConditionError.new(sym) unless instance_eval(&proc_after)
+        raise "Error de Post-Condicion en #{self}:#{sym}" unless instance_eval(&proc_after)
       end
       resultado
 
+      # add_decorated_method sym
     end
     @before = nil
     @after = nil
@@ -101,16 +107,17 @@ module BeforeAndAfter
   end
 
   def decored_methods
-    @decored_methods
+    @decored_methods ||=[]
   end
 
   def add_decorated_method method
+    puts "Entre al metodo add_decorated_method para el metodo #{method}"
     @decored_methods ||= []
     @decored_methods.push method
   end
 
   def original_methods
-    @original_methods
+    @original_methods ||= []
   end
 
   def add_original_method method

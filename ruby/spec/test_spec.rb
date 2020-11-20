@@ -1,6 +1,5 @@
-require 'rspec'
-require_relative '../lib/main'
-
+require 'sourcify'
+require_relative 'spec_helper'
 
 ### Errores para Copiar en los spec
 #
@@ -15,48 +14,38 @@ require_relative '../lib/main'
 
 describe 'test con la pila' do
 
-  before do
-    @pila = Pila.new (2)
-    @pila.push 2
-    @pila.push 3
+  it 'deberia saltar violacion de invariant una pila con capacidad negativa' do
+    expect{pila=Pila.new -1}.to raise_error(RuntimeError)
   end
 
-  it 'deberia tirar error de pre-condicion al hacer push' do
-    sym = :push
-    expect(@pila.push 4).to raise_error(PreConditionError.new(sym))
-
+  it 'deberia soltar una excepcion de invariant un guerrero atacando a otro más debil' do
+    expect{
+      unGuerrero = Guerrero.new 100,90
+      otroGuerrero = Guerrero.new 10 , 10
+      unGuerrero.atacar otroGuerrero
+    }.to raise_error(RuntimeError)
   end
 
-  it 'deberia tirar error de invariant al crear una pila con capacidad negativa' do
-    expect(@pila2 = Pila.new(-2)).to raise ( "No se cumplio la invariante")
+  it 'deberia soltar una excepcion de invariant un guerrero con fuerza > 100' do
+    expect{
+      unGuerrero = Guerrero.new 100,120
+    }.to raise_error(RuntimeError)
   end
 
-  before do
-    @pila = Pila.new 1
-    # pila vacia
+  it 'deberia soltar una excepcion de invariant un guerrero con vida negativa' do
+    expect{
+      unGuerrero = Guerrero.new(-100,20)
+    }.to raise_error(RuntimeError)
   end
 
-  it 'deberia tirar error de pre-condicion al pedirle top a una pila vacia' do
-    expect(@pila.top).to raise ("No se cumplio la pre-condicion")
-  end
-
-
-
-end
-
-describe 'test con el guerrero' do
-  before do
-    @atila = Guerrero.new 100,90
-    @bleda = Guerrero.new 80,10
-  end
-
-  it 'deberia tirar error de invariante cuando atila ataque a bleda' do
-    expect(@atila.atacar @bleda).to raise ("No se cumplio la invariante")
-  end
-
-  it 'bleda puede atacar a atila' do
-    @bleda.atacar @atila
-    expect(@bleda.vida).eql? 90
+  it 'deberia soltar una excepcion, luego de abrir la clase y agregar una invariant' do
+    expect{
+      pila = Pila.new 100
+      class Pila
+        invariant{capacity < 50}
+      end
+      pila.push 2
+    }.to raise_error(RuntimeError)
   end
 
 
