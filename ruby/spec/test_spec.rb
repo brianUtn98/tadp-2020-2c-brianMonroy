@@ -61,12 +61,12 @@ describe 'Contracts FW test' do
 end
 
   describe 'pre-condition' do
-      # it 'deberia fallar con argumentos' do
-      #   expect{
-      #     operacion = Operaciones.new
-      #     operacion.dividir 30,0
-      #   }.to raise_error(RuntimeError)
-      # end
+      it 'deberia fallar con argumentos' do
+        expect{
+          operacion = Operaciones.new
+          operacion.dividir 30,0
+        }.to raise_error(RuntimeError)
+      end
 
     it 'no se puede agregar elementos a una pila llena' do
       expect{
@@ -94,12 +94,12 @@ end
   end
 
   describe 'post-condition' do
-    # it 'deberia fallar post de dividir' do
-    #   expect{
-    #     div = Operaciones.new
-    #     div.dividir 10,3
-    #   }.to raise_error(RuntimeError)
-    # end
+    it 'deberia fallar post de dividir' do
+      expect{
+        div = Operaciones.new
+        div.dividir 10,3
+      }.to raise_error(RuntimeError)
+    end
   end
 
   class A

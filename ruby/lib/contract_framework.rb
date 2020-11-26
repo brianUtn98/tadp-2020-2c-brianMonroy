@@ -41,9 +41,17 @@ module BeforeAndAfter
 
     proc_after = after
 
+    argumentos_sym = original_method.parameters.map{|unArg| unArg[1].to_s}
+
     add_decorated_method(sym,original_method)
     define_method(sym) do |*argumentos|
       context = Wrapper.new self
+      
+      argumentos_sym.each_with_index do |arg,index|
+        context.define_singleton_method(arg) do
+          argumentos[index]
+        end
+      end
       puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
       unless @before
         raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&proc_before)
@@ -58,8 +66,14 @@ module BeforeAndAfter
         raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_eval(&oneInvariant)
       end
 
+      argumentos_sym.each_with_index do |arg,index|
+        context.define_singleton_method(arg) do
+          argumentos[index]
+        end
+      end
+
       unless @after
-        raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(&proc_after)
+        raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
       end
       resultado
 
