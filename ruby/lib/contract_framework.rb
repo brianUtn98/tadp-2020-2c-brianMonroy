@@ -1,5 +1,9 @@
 require_relative 'errores'
 
+class Module
+  attr_reader :has_contract
+end
+
 class Wrapper
   attr_accessor :wrappedObject
 
@@ -9,9 +13,9 @@ class Wrapper
 
   private def method_missing(symbol, *args)
     return unless wrappedObject.class.decorated_methods.has_key? symbol
-    metodo = wrappedObject.class.decorated_methods[symbol].bind(wrappedObject)
-    metodo.call(*args)
-  end
+      metodo = wrappedObject.class.decorated_methods[symbol].bind(wrappedObject)
+      metodo.call(*args)
+    end
 
   def respond_to_missing?(method_name, include_private = false)
     method_name.to_s.start_with?('user_') || super
@@ -23,15 +27,17 @@ module BeforeAndAfter
   @before = nil
   @after = nil
 
-  class << self
+
     attr_reader :before , :after,:invariants
-  end
+
 
 
   def method_added(sym)
-    puts "Dentro de method added self es #{self}, agregando metodo #{sym}"
-    return if @working or BasicObject.is_a? self or decorated_methods.has_key? :sym# o ya fue decorado, o es una clase del meta modelo
 
+    return if @working or Class.ancestors.include? self or decorated_methods.has_key? :sym or !@has_contract# o ya fue decorado, o es una clase del meta modelo
+
+
+    puts "Dentro de method added self es #{self}, agregando metodo #{sym}"
     original_method = self.instance_method(sym)
 
 
@@ -63,7 +69,7 @@ module BeforeAndAfter
       self.class.invariants.each do |oneInvariant|
         puts "Evaluando invariant sobre #{context.wrappedObject}"
         puts "El wrapper es #{context}"
-        raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_eval(&oneInvariant)
+        raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_exec(&oneInvariant)
       end
 
       argumentos_sym.each_with_index do |arg,index|
@@ -93,15 +99,18 @@ module BeforeAndAfter
 
   def invariant(&block)
     #puts "Agregando una invariant"
+    contract_class
     @invariants ||= []
     @invariants << block
   end
 
   def pre(&pre_condicion)
+    contract_class
     @before = pre_condicion
   end
 
   def post(&post_condicion)
+    contract_class
     @after = post_condicion
   end
 
@@ -146,6 +155,11 @@ module BeforeAndAfter
     context
   end
 
-end
+  def contract_class
+    return if has_contract
 
+    @has_contract = true
+  end
+
+end
 

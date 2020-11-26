@@ -1,9 +1,7 @@
-require_relative 'inclusion'
+require_relative 'tadp_contracts'
 
 class Pila
   attr_accessor :current_node, :capacity
-  include Contrato
-
   invariant { capacity >= 0}
 
   post { empty? }
@@ -52,13 +50,15 @@ end
 class Guerrero
 
   attr_accessor :vida, :fuerza
-  include Contrato
+
+  invariant { vida >= 0 }
+  invariant { fuerza.positive? && fuerza < 100 }
+
   def initialize vida,fuerza
     @vida = vida
     @fuerza = fuerza
   end
-  invariant { vida >= 0 }
-  invariant { fuerza.positive? && fuerza < 100 }
+
 
 
   def atacar(otro)
@@ -69,27 +69,22 @@ class Guerrero
     @vida -= cuanto
   end
 
- #  def bajar unidades
- #    self.vida -= unidades
- #  end
-
 end
 
 class Golondrina
 
   attr_accessor :energia, :cansada
-  include Contrato
   invariant { energia >= 0}
   def initialize energia
     @energia = energia
     @cansada = false
   end
 
-  pre { !cansada }
-  post{ cansada }
+  pre { no_cansada }
+  post{ cansada? }
   def volar kms
-    self.energia -= kms
-    self.cansada = true
+    @energia -= kms
+    @cansada = true
   end
 
 
@@ -100,11 +95,18 @@ class Golondrina
     @cansada = false
   end
 
+  def no_cansada
+    !cansada
+  end
+
+  def cansada?
+    cansada == true
+  end
+
 end
 
 class Operaciones
   #precondición de dividir
-   include Contrato
    pre { divisor != 0 }
   #postcondición de dividir
    post { |result| result * divisor == dividendo }
