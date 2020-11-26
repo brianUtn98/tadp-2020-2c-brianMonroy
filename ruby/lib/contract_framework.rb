@@ -1,56 +1,48 @@
-require 'rspec'
 require_relative 'errores'
 
+class Wrapper
+  attr_accessor :context
 
-
-
-# TODO sacarme este pasamanos
-
-module Contrato
-
-  def self.included(base)
-    base.extend(BeforeAndAfter)
+  def initialize context
+    @context = context
   end
 
+  private def method_missing(symbol, *args)
+    metodo= context.class.decorated_methods[symbol].bind(context)
+    metodo.call(*args)
+  end
+
+  def respond_to_missing?(method_name, include_private = false)
+    method_name.to_s.start_with?('user_') || super
+  end
 end
-
-
 
 module BeforeAndAfter
 
-  #before y after comienzan en nul, seran seteadas por before_and_after_each_call , pre y post.
-
-
   @before = nil
   @after = nil
-  #defino before and after, como metodos de clase
+
   class << self
-    attr_reader :before , :after
+    attr_reader :before , :after,:invariants
   end
 
 
   def method_added(sym)
-
-    # if decored_methods.include? sym
-    #   puts 'Este metodo ya fue decorado'
-    # end
-
-    return if @working #or decored_methods.include? sym
+    puts "Dentro de method added self es #{self}, agregando metodo #{sym}"
+    return if @working or self == Object or self == Module or self == Class or self==BasicObject or decorated_methods.has_key? :sym# o ya fue decorado, o es una clase del meta modelo
 
     original_method = instance_method(sym)
 
-    # add_original_method(original_method)
 
     @working = true
-
-    proc_invariants = invariants
 
     proc_before = before
 
     proc_after = after
 
-
+    add_decorated_method(sym,original_method)
     define_method(sym) do |*argumentos|
+      puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
       unless @before
         raise "Error de Pre-Condicion en #{self}:#{sym}" unless instance_eval(&proc_before)
       end
@@ -59,8 +51,7 @@ module BeforeAndAfter
 
       # TODO las invariantes hay que pedirlas en el momento para contemplar nuevas.
       self.class.invariants.each do |oneInvariant|
-        #puts invariant.to_source(strip_enclosure: true)
-        raise "No se cumplio la invariante" unless instance_eval(&oneInvariant)
+        raise "No se cumplio la invariante en #{self}:#{sym}" unless instance_eval(&oneInvariant)
       end
 
       unless @after
@@ -68,11 +59,13 @@ module BeforeAndAfter
       end
       resultado
 
-      # add_decorated_method sym
+
     end
     @before = nil
     @after = nil
     @working = false
+
+    super # para que rubymine no se queje
   end
 
   def before_and_after_each_call(before = proc{},after = proc{})
@@ -106,23 +99,33 @@ module BeforeAndAfter
     @after ||= proc { true }
   end
 
-  def decored_methods
-    @decored_methods ||=[]
+  def decorated_methods
+    @decored_methods ||={}
   end
 
-  def add_decorated_method method
-    puts "Entre al metodo add_decorated_method para el metodo #{method}"
-    @decored_methods ||= []
-    @decored_methods.push method
+  def add_decorated_method sym,method
+    puts "Entre al metodo add_decorated_method para el metodo #{sym}"
+    @decored_methods ||= {}
+    @decored_methods[sym] = method
+    puts "Agregué el metodo #{sym} al hash"
+    #@decored_methods.push metodo_decorado
   end
 
-  def original_methods
-    @original_methods ||= []
+  private def getters
+    @getters ||= []
   end
 
-  def add_original_method method
-    @original_methods ||= []
-    @original_methods.push method
+  private def add_getters(method_names)
+    @getters = send(:getters) + method_names
+  end
+
+  private def reserved_methods
+    [:irb_binding]
+  end
+
+  def generate_context object
+    context = Wrapper.new object
+    context
   end
 
 end

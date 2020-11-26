@@ -1,12 +1,8 @@
-require_relative 'contract_framework'
-
+require_relative 'inclusion'
 
 class Pila
   attr_accessor :current_node, :capacity
-
-  #por algun motivo, se debe incluir el mixin luego de attr_accesor
   include Contrato
-
 
   invariant { capacity >= 0}
 
@@ -15,10 +11,6 @@ class Pila
     @capacity = capacity
     @current_node = nil
   end
-
-  # def capacity
-  #   @capacity
-  # end
 
   pre { !full? }
   post { height.positive? }
@@ -87,7 +79,7 @@ class Golondrina
 
   attr_accessor :energia, :cansada
   include Contrato
-   invariant { energia >= 0}
+  invariant { energia >= 0}
   def initialize energia
     @energia = energia
     @cansada = false
@@ -110,12 +102,26 @@ class Golondrina
 
 end
 
-# unGuerrero = Guerrero.new 100,90
-# otroGuerrero = Guerrero.new 1, 10
-# unGuerrero.atacar otroGuerrero
-#
-pila = Pila.new 100
+class Operaciones
+  #precondición de dividir
+   include Contrato
+   pre { divisor != 0 }
+  #postcondición de dividir
+   post { |result| result * divisor == dividendo }
+   def dividir(dividendo, divisor)
+     dividendo / divisor
+   end
 
 
+  # este método no se ve afectado por ninguna pre/post condición
+   def restar(minuendo, sustraendo)
+     minuendo - sustraendo
+   end
 
-pila.push 3
+end
+
+pila = Pila.new 2
+wrapperPila = Wrapper.new pila
+wrapperPila.push 2
+wrapperPila.push 3
+wrapperPila.push 4
