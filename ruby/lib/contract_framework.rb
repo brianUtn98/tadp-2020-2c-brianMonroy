@@ -67,13 +67,9 @@ module BeforeAndAfter
       end
 
       unless @typed_args
-        puts "Evaluando argumentos en #{self}:#{sym}"
-        puts "Typed arguments es : #{proc_typed_args.to_s}"
         proc_typed_args.each_with_index do |key,index|
-          puts "Estoy en la key #{key.to_s} e index #{index.to_s}"
-          puts "argumentos[index]:#{argumentos[index].to_s},proc_typed_args[key]:#{proc_typed_args[key[0]].to_s}"
-          raise "No se cumplio el tipo #{proc_typed_args[key].to_s} en el parametro #{key.to_s}" unless argumentos[index].is_a? proc_typed_args[key[0]]
-        end
+          raise "No se cumplio el tipo #{key[1].to_s} en el parametro #{key[0].to_s}" unless argumentos[index].is_a? proc_typed_args[key[0]]
+         end
       end
       #puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
       unless @before

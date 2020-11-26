@@ -140,3 +140,6 @@ class TypedClass
     resultado
   end
 end
+
+t = TypedClass.new
+t.cargarPersona 1,2
