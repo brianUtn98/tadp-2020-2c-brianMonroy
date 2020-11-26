@@ -1,14 +1,15 @@
 require_relative 'errores'
 
 class Wrapper
-  attr_accessor :context
+  attr_accessor :wrappedObject
 
   def initialize context
-    @context = context
+    @wrappedObject = context
   end
 
   private def method_missing(symbol, *args)
-    metodo= context.class.decorated_methods[symbol].bind(context)
+    return unless wrappedObject.class.decorated_methods.has_key? symbol
+    metodo = wrappedObject.class.decorated_methods[symbol].bind(wrappedObject)
     metodo.call(*args)
   end
 
@@ -29,9 +30,9 @@ module BeforeAndAfter
 
   def method_added(sym)
     puts "Dentro de method added self es #{self}, agregando metodo #{sym}"
-    return if @working or self == Object or self == Module or self == Class or self==BasicObject or decorated_methods.has_key? :sym# o ya fue decorado, o es una clase del meta modelo
+    return if @working or BasicObject.is_a? self or decorated_methods.has_key? :sym# o ya fue decorado, o es una clase del meta modelo
 
-    original_method = instance_method(sym)
+    original_method = self.instance_method(sym)
 
 
     @working = true
@@ -42,20 +43,23 @@ module BeforeAndAfter
 
     add_decorated_method(sym,original_method)
     define_method(sym) do |*argumentos|
+      context = Wrapper.new self
       puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
       unless @before
-        raise "Error de Pre-Condicion en #{self}:#{sym}" unless instance_eval(&proc_before)
+        raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&proc_before)
       end
 
-      resultado = original_method.bind(self).call(*argumentos)
+      resultado = original_method.bind(context.wrappedObject).call(*argumentos)
 
       # TODO las invariantes hay que pedirlas en el momento para contemplar nuevas.
       self.class.invariants.each do |oneInvariant|
-        raise "No se cumplio la invariante en #{self}:#{sym}" unless instance_eval(&oneInvariant)
+        puts "Evaluando invariant sobre #{context.wrappedObject}"
+        puts "El wrapper es #{context}"
+        raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_eval(&oneInvariant)
       end
 
       unless @after
-        raise "Error de Post-Condicion en #{self}:#{sym}" unless instance_eval(&proc_after)
+        raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(&proc_after)
       end
       resultado
 
@@ -123,8 +127,8 @@ module BeforeAndAfter
     [:irb_binding]
   end
 
-  def generate_context object
-    context = Wrapper.new object
+  def generate_context
+    context = Wrapper.new self
     context
   end
 

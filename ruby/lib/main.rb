@@ -119,9 +119,3 @@ class Operaciones
    end
 
 end
-
-pila = Pila.new 2
-wrapperPila = Wrapper.new pila
-wrapperPila.push 2
-wrapperPila.push 3
-wrapperPila.push 4
