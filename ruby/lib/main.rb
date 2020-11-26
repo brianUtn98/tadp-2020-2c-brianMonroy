@@ -121,3 +121,22 @@ class Operaciones
    end
 
 end
+
+class TypedClass
+
+  typed({nombre: String,edad:Integer},String)
+  def cargarPersona(nombre,edad)
+    if(edad < 18)
+      mensaje = "Es menor"
+      mensaje
+    else
+      mensaje = "Es mayor"
+      mensaje
+    end
+  end
+  typed({operacion: Operaciones,num1: Integer,num2: Integer},Integer)
+  def dividir(operacion,num1,num2)
+    resultado = operacion.dividir num1,num2
+    resultado
+  end
+end

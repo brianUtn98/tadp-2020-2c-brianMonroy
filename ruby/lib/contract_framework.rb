@@ -12,13 +12,17 @@ class Wrapper
   end
 
   private def method_missing(symbol, *args)
-    super unless wrappedObject.class.decorated_methods.has_key? symbol
+    if wrappedObject.class.decorated_methods.has_key? symbol
       metodo = wrappedObject.class.decorated_methods[symbol].bind(wrappedObject)
       metodo.call(*args)
+    else
+      super
     end
+  end
 
   def respond_to_missing?(method_name, include_private = false)
-    method_name.to_s.start_with?('user_') || super
+    # method_name.to_s.start_with?('user_') || super
+    wrappedObject.respond_to_missing? method_name || super
   end
 end
 
@@ -26,9 +30,11 @@ module BeforeAndAfter
 
   @before = nil
   @after = nil
+  # @typed_args = nil
+  #@typed_result = nil
 
 
-    attr_reader :before , :after,:invariants
+  attr_reader :before , :after,:invariants,:typed,:typed_args,:typed_result
 
 
 
@@ -44,6 +50,10 @@ module BeforeAndAfter
 
     proc_after = after
 
+    proc_typed_args = typed_args
+
+    proc_typed_result = typed_result
+
     argumentos_sym = original_method.parameters.map{|unArg| unArg[1].to_s}
 
     add_decorated_method(sym,original_method)
@@ -53,6 +63,16 @@ module BeforeAndAfter
       argumentos_sym.each_with_index do |arg,index|
         context.define_singleton_method(arg) do
           argumentos[index]
+        end
+      end
+
+      unless @typed_args
+        puts "Evaluando argumentos en #{self}:#{sym}"
+        puts "Typed arguments es : #{proc_typed_args.to_s}"
+        proc_typed_args.each_with_index do |key,index|
+          puts "Estoy en la key #{key.to_s} e index #{index.to_s}"
+          puts "argumentos[index]:#{argumentos[index].to_s},proc_typed_args[key]:#{proc_typed_args[key[0]].to_s}"
+          raise "No se cumplio el tipo #{proc_typed_args[key].to_s} en el parametro #{key.to_s}" unless argumentos[index].is_a? proc_typed_args[key[0]]
         end
       end
       #puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
@@ -77,12 +97,19 @@ module BeforeAndAfter
       unless @after
         raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
       end
+
+      unless @typed_result
+        puts "Evaluando typed_result en #{self}:#{sym}"
+        raise "El resultado no es de tipo #{proc_typed_result.to_s}" unless resultado.is_a? proc_typed_result
+      end
       resultado
 
 
     end
     @before = nil
     @after = nil
+    @typed_result = nil
+    @typed_args = nil
 
     super # para que rubymine no se queje
   end
@@ -120,8 +147,16 @@ module BeforeAndAfter
     @after ||= proc { true }
   end
 
+  def typed_args
+    @typed_args ||= {a: Object}
+  end
+
+  def typed_result
+    @typed_result ||= Object
+  end
+
   def decorated_methods
-    @decored_methods ||={}
+    @decored_methods ||= {}
   end
 
   def add_decorated_method sym,method
@@ -155,5 +190,12 @@ module BeforeAndAfter
     @has_contract = true
   end
 
-end
+  def typed map,result
+    contract_class
+    puts "Definiendo typed con #{map}:#{result}"
+    @typed_args = map
+    @typed_result = result
+    puts "#{typed_args}:#{typed_result}"
+  end
 
+end

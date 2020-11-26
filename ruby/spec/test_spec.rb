@@ -146,4 +146,34 @@ end
     end
   end
 
+  describe 'Typed' do
+    it 'deberia pasar con un tipado valido' do
+      expect{
+        t = TypedClass.new
+        t.cargarPersona "Brian",21
+      }.not_to raise_error
+    end
+
+    it 'deberia fallar con tipado invalido' do
+      expect{
+        t = TypedClass.new
+        t.cargarPersona Object,"Bleh"
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia pasar con tipos complejos' do
+      expect{
+        t = TypedClass.new
+        t.dividir Operaciones.new,10,5
+      }.not_to raise_error
+    end
+
+    it 'deberia fallar con tipos complejos' do
+      expect{
+        t = TypedClass.new
+        t.dividir (Pila.new 2),3,5
+      }.to raise_error(RuntimeError)
+    end
+  end
+
 end
