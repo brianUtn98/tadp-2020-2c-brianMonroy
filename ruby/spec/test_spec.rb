@@ -174,6 +174,13 @@ end
         t.dividir (Pila.new 2),3,5
       }.to raise_error(RuntimeError)
     end
+
+    it 'deberia fallar por resultado mal tipado' do
+      expect{
+        t = TypedClass.new
+        t.dividirEntero 10,5
+      }.to raise_error(RuntimeError)
+    end
   end
 
 end

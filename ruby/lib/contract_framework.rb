@@ -95,7 +95,7 @@ module BeforeAndAfter
       end
 
       unless @typed_result
-        puts "Evaluando typed_result en #{self}:#{sym}"
+        #puts "Evaluando typed_result en #{self}:#{sym}"
         raise "El resultado no es de tipo #{proc_typed_result.to_s}" unless resultado.is_a? proc_typed_result
       end
       resultado
@@ -188,10 +188,10 @@ module BeforeAndAfter
 
   def typed map,result
     contract_class
-    puts "Definiendo typed con #{map}:#{result}"
+    #puts "Definiendo typed con #{map}:#{result}"
     @typed_args = map
     @typed_result = result
-    puts "#{typed_args}:#{typed_result}"
+    #puts "#{typed_args}:#{typed_result}"
   end
 
 end

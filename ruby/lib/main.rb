@@ -139,7 +139,10 @@ class TypedClass
     resultado = operacion.dividir num1,num2
     resultado
   end
-end
 
-t = TypedClass.new
-t.cargarPersona 1,2
+  #Este metodo falla.
+  typed({num1: Integer,num2:Integer},Integer)
+  def dividirEntero num1,num2
+    "#{num1/num2}"
+  end
+end
