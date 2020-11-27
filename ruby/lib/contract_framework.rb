@@ -30,6 +30,8 @@ module BeforeAndAfter
 
   @before = nil
   @after = nil
+  @typed_args = nil
+  @typed_result = nil
   # @typed_args = nil
   #@typed_result = nil
 
@@ -54,22 +56,36 @@ module BeforeAndAfter
 
     proc_typed_result = typed_result
 
-    argumentos_sym = original_method.parameters.map{|unArg| unArg[1].to_s}
+    argumentos_nombres = original_method.parameters.map{|unArg| unArg[1].to_s}
+
+    argumentos_sym = original_method.parameters.map{|unArg| unArg[1]}
+
+    puts "El metodo #{sym} tiene argumentos: "
+    argumentos_nombres.each do |unArg|
+      puts "#{unArg}"
+    end
 
     add_decorated_method(sym,original_method)
     define_method(sym) do |*argumentos|
       context = Wrapper.new self
       
-      argumentos_sym.each_with_index do |arg,index|
+      argumentos_nombres.each_with_index do |arg,index|
         context.define_singleton_method(arg) do
           argumentos[index]
         end
       end
 
-      unless @typed_args
-        proc_typed_args.each_with_index do |key,index|
-          raise "No se cumplio el tipo #{key[1].to_s} en el parametro #{key[0].to_s}" unless argumentos[index].is_a? proc_typed_args[key[0]]
-         end
+      # unless @typed_args
+      #   proc_typed_args.each_with_index do |key,index|
+      #     raise "No se cumplio el tipo #{key[1].to_s} en el parametro #{key[0].to_s}" unless argumentos[index].is_a? proc_typed_args[key[0]]
+      #    end
+      # end
+
+      unless proc_typed_args.nil?
+        argumentos_sym.each_with_index do |arg,index|
+          puts "Evaluando argumento #{arg}:#{argumentos[index]}, debe ser de tipo #{proc_typed_args[arg].to_s}"
+          raise "No se cumplio el tipo #{proc_typed_args[:arg]} en el parametro #{arg}" unless argumentos[index].is_a? proc_typed_args[arg]
+        end
       end
       #puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
       unless @before
@@ -84,7 +100,7 @@ module BeforeAndAfter
         raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_exec(&oneInvariant)
       end
 
-      argumentos_sym.each_with_index do |arg,index|
+      argumentos_nombres.each_with_index do |arg,index|
         context.define_singleton_method(arg) do
           argumentos[index]
         end
@@ -94,8 +110,8 @@ module BeforeAndAfter
         raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
       end
 
-      unless @typed_result
-        #puts "Evaluando typed_result en #{self}:#{sym}"
+      unless proc_typed_result.nil?
+        puts "Evaluando el resultado #{resultado}, deberia ser de tipo #{proc_typed_result.to_s}"
         raise "El resultado no es de tipo #{proc_typed_result.to_s}" unless resultado.is_a? proc_typed_result
       end
       resultado
@@ -144,11 +160,11 @@ module BeforeAndAfter
   end
 
   def typed_args
-    @typed_args ||= {a: Object}
+    @typed_args ||= nil
   end
 
   def typed_result
-    @typed_result ||= Object
+    @typed_result ||= nil
   end
 
   def decorated_methods
@@ -188,10 +204,8 @@ module BeforeAndAfter
 
   def typed map,result
     contract_class
-    #puts "Definiendo typed con #{map}:#{result}"
     @typed_args = map
     @typed_result = result
-    #puts "#{typed_args}:#{typed_result}"
   end
 
 end

@@ -134,7 +134,8 @@ class TypedClass
       mensaje
     end
   end
-  typed({operacion: Operaciones,num1: Integer,num2: Integer},Integer)
+
+  typed({num1:Integer,operacion:Operaciones,num2:Integer},Integer)
   def dividir(operacion,num1,num2)
     resultado = operacion.dividir num1,num2
     resultado

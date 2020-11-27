@@ -10,7 +10,7 @@ describe 'Contracts FW test' do
 
   it 'deberia soltar una excepcion de invariant un guerrero atacando a otro más debil' do
     expect{
-      unGuerrero = Guerrero.new 100,90
+      unGuerrero = Guerrero.new 100, 90
       otroGuerrero = Guerrero.new 10 , 10
       unGuerrero.atacar otroGuerrero
     }.to raise_error(RuntimeError)
@@ -18,13 +18,13 @@ describe 'Contracts FW test' do
 
   it 'deberia soltar una excepcion de invariant un guerrero con fuerza > 100' do
     expect{
-      unGuerrero = Guerrero.new 100,120
+      unGuerrero = Guerrero.new 100, 120
     }.to raise_error(RuntimeError)
   end
 
   it 'deberia soltar una excepcion de invariant un guerrero con vida negativa' do
     expect{
-      unGuerrero = Guerrero.new(-100,20)
+      unGuerrero = Guerrero.new(-100, 20)
     }.to raise_error(RuntimeError)
   end
 
@@ -55,7 +55,7 @@ end
       it 'deberia fallar con argumentos' do
         expect{
           operacion = Operaciones.new
-          operacion.dividir 30,0
+          operacion.dividir 30, 0
         }.to raise_error(RuntimeError)
       end
 
@@ -88,19 +88,17 @@ end
     it 'deberia fallar post de dividir' do
       expect{
         div = Operaciones.new
-        div.dividir 10,3
+        div.dividir 10, 3
       }.to raise_error(RuntimeError)
     end
   end
 
   class A
-    attr_accessor :unParam,:otroParam
+    attr_accessor :unParam, :otroParam
     def initialize unParam, otroParam
       @unParam = unParam
       @otroParam = otroParam
     end
-
-
 
     pre { unParam < 100 }
     def inc q
@@ -111,7 +109,6 @@ end
     def bleh
       @unParam += @otroParam
     end
-
   end
 
   describe('method_added') {
@@ -150,35 +147,35 @@ end
     it 'deberia pasar con un tipado valido' do
       expect{
         t = TypedClass.new
-        t.cargarPersona "Brian",21
+        t.cargarPersona "Brian", 21
       }.not_to raise_error
     end
 
     it 'deberia fallar con tipado invalido' do
       expect{
         t = TypedClass.new
-        t.cargarPersona Object,"Bleh"
+        t.cargarPersona Object, "Bleh"
       }.to raise_error(RuntimeError)
     end
 
     it 'deberia pasar con tipos complejos' do
       expect{
         t = TypedClass.new
-        t.dividir Operaciones.new,10,5
+        t.dividir Operaciones.new, 10, 5
       }.not_to raise_error
     end
 
     it 'deberia fallar con tipos complejos' do
       expect{
         t = TypedClass.new
-        t.dividir (Pila.new 2),3,5
+        t.dividir (Pila.new 2), 3, 5
       }.to raise_error(RuntimeError)
     end
 
     it 'deberia fallar por resultado mal tipado' do
       expect{
         t = TypedClass.new
-        t.dividirEntero 10,5
+        t.dividirEntero 10, 5
       }.to raise_error(RuntimeError)
     end
   end
