@@ -56,9 +56,9 @@ module BeforeAndAfter
 
     proc_typed_result = typed_result
 
-    argumentos_nombres = original_method.parameters.map{|unArg| unArg[1].to_s}
+    argumentos_nombres = original_method.parameters.map{ |unArg| unArg[1].to_s }
 
-    argumentos_sym = original_method.parameters.map{|unArg| unArg[1]}
+    argumentos_sym = original_method.parameters.map{ |unArg| unArg[1] }
 
     puts "El metodo #{sym} tiene argumentos: "
     argumentos_nombres.each do |unArg|
@@ -81,12 +81,12 @@ module BeforeAndAfter
       #    end
       # end
 
-      unless proc_typed_args.nil?
-        argumentos_sym.each_with_index do |arg,index|
-          puts "Evaluando argumento #{arg}:#{argumentos[index]}, debe ser de tipo #{proc_typed_args[arg].to_s}"
-          raise "No se cumplio el tipo #{proc_typed_args[:arg]} en el parametro #{arg}" unless argumentos[index].is_a? proc_typed_args[arg]
-        end
-      end
+      # unless proc_typed_args.nil?
+      #   argumentos_sym.each_with_index do |arg,index|
+      #     puts "Evaluando argumento #{arg}:#{argumentos[index]}, debe ser de tipo #{proc_typed_args[arg].to_s}"
+      #     raise "No se cumplio el tipo #{proc_typed_args[:arg]} en el parametro #{arg}" unless argumentos[index].is_a? proc_typed_args[arg]
+      #   end
+      # end
       #puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
       unless @before
         raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&proc_before)
@@ -110,10 +110,10 @@ module BeforeAndAfter
         raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
       end
 
-      unless proc_typed_result.nil?
-        puts "Evaluando el resultado #{resultado}, deberia ser de tipo #{proc_typed_result.to_s}"
-        raise "El resultado no es de tipo #{proc_typed_result.to_s}" unless resultado.is_a? proc_typed_result
-      end
+      # unless proc_typed_result.nil?
+      #   puts "Evaluando el resultado #{resultado}, deberia ser de tipo #{proc_typed_result.to_s}"
+      #   raise "El resultado no es de tipo #{proc_typed_result.to_s}" unless resultado.is_a? proc_typed_result
+      # end
       resultado
 
 
@@ -204,8 +204,11 @@ module BeforeAndAfter
 
   def typed map,result
     contract_class
-    @typed_args = map
-    @typed_result = result
+    # @typed_args = map
+    # @typed_result = result
+
+    pre { map.all? { |arg,type| send(arg).is_a? type } }
+    post {|method_result| method_result.is_a? result }
   end
 
 end
