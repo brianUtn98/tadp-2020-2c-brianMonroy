@@ -61,7 +61,7 @@ object Operations {
 
   // Una operación es una función que se aplica sobre un contexto,
   // y me devuelve la función que tengo que llamar para revertirla
-  type StackableOperation = GraphicsContext => RevertOperation
+    type StackableOperation = GraphicsContext => RevertOperation
 
   def transformOperation(transformation: GraphicsContext => Unit): StackableOperation = context => {
     val previousTransform = context.getTransform
