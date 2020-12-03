@@ -121,3 +121,69 @@ class Operaciones
    end
 
 end
+
+class DuckedClass
+  duck([:push,:pop,:top],[:+,:*,:even?])
+  def meterEnPila(pila,numero)
+    pila.push numero
+  end
+
+  duck([:/,:*,:+,:even?],[:/,:*,:+,:even?])
+  def dividirEnteros(num1,num2)
+    puts "#{num1/num2}"
+  end
+
+
+
+end
+
+class MixedClass
+  #clase con pre,post,ducked
+
+  attr_accessor :habilitado
+
+  def initialize
+    @habilitado = false
+  end
+
+  pre {habilitado?}
+  post {!habilitado?}
+  duck([:push,:pop,:top],[:+,:*,:even?])
+  def meterEnPila(pila,numero)
+    pila.push numero
+    deshabilitar
+  end
+
+  def habilitar
+    @habilitado = true
+  end
+
+  def deshabilitar
+    @habilitado = false
+  end
+
+  def habilitado?
+    habilitado
+  end
+
+  duck([:even?])
+  def metodo_que_falla num1,num2
+    res = num1+num2
+    res
+  end
+
+  duck([:size,:try_convert],[:even?])
+  def saludar(nombre,edad)
+    puts "Hola #{nombre}, edad:#{edad}"
+  end
+
+  duck([:pop,:push,:top])
+  def encadenado(pila)
+    pila.pop
+  end
+
+  duck([:encadenado])
+  def saludarse_a_si_mismo instancia
+    puts "Hola #{instancia}"
+  end
+end

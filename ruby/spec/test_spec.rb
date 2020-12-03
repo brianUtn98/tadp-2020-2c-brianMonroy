@@ -146,4 +146,143 @@ end
     end
   end
 
+  describe 'test individual' do
+
+    it 'deberia poder hacer division entera' do
+      expect{
+        d = DuckedClass.new
+        d.dividirEnteros 10,5
+      }.to_not raise_error
+    end
+
+    it 'no deberia poder dividir con float' do
+      expect{
+        d = DuckedClass.new
+        d.dividirEnteros 10,5.5
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia poder meter elementos en una pila' do
+      expect{ pila = Pila.new 2
+      d = DuckedClass.new
+      d.meterEnPila pila,5
+      }.to_not raise_error
+    end
+
+    it 'no puedo usar meterPila con algo que no sea una pila' do
+      expect{
+        d = DuckedClass.new
+        div = Operaciones.new
+        d.meterEnPila div,5
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'no puedo meter en una pila algo que no sea entero' do
+      expect{
+        d = DuckedClass.new
+        pila = Pila.new 2
+        d.meterEnPila pila,5.5
+      }.to raise_error(RuntimeError)
+    end
+
+    #combinacion de pre con ducked
+    it 'deberia poder meter en una pila si habilito' do
+      expect{
+        m = MixedClass.new
+        p = Pila.new 2
+        m.habilitar
+        m.meterEnPila p,6
+      }.to_not raise_error
+    end
+
+    it 'no deberia poder meter en pila sin habilitar' do
+      expect{
+        m = MixedClass.new
+        p = Pila.new 2
+        m.meterEnPila p,6
+      }.to raise_error(RuntimeError)
+    end
+
+    #m habria que habilitarlo, pero el orden de ejecución es primero duck y luego pre, así que no hace falta, falla por duck.
+    it 'deberia fallar por ducked y no por pre' do
+      expect{
+        m = MixedClass.new
+        m.meterEnPila 5,2
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia fallar por ducked y no por pre, segundo param' do
+      expect{
+        m = MixedClass.new
+        p = Pila.new 2
+        m.meterEnPila p,5.5
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia fallar por cantidad de parametros incorrecta' do
+      expect{
+        m = MixedClass.new
+        m.metodo_que_falla 2,5
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia fallar colateralmente' do
+      expect{
+        d = DuckedClass.new
+        p = Pila.new 2
+        d.meterEnPila p,5
+        d.meterEnPila p,6
+        d.meterEnPila p,7
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia fallar si le paso otra cosa' do
+      expect{
+        m = MixedClass.new
+        m.saludar 3,"Hola"
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia andar si le paso bien' do
+      expect{
+        m = MixedClass.new
+        m.saludar "Brian",21
+      }
+
+    end
+
+    it 'deberia fallar con metodo encadenado' do
+      expect{
+        m = MixedClass.new
+        g = Guerrero.new 50,10
+        m.encadenado g
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia andar con metodo encadenado' do
+      expect{
+        m = MixedClass.new
+        p = Pila.new 2
+        p.push 2
+        m.encadenado p
+      }.to_not raise_error
+    end
+
+    it 'deberia poder andar consigo mismo' do
+      expect{
+        m = MixedClass.new
+        m.saludarse_a_si_mismo m
+      }.to_not raise_error
+    end
+
+    it 'deberia andar con cualquier otra instancia' do
+      expect{
+        m1 = MixedClass.new
+        m2 = MixedClass.new
+        m1.saludarse_a_si_mismo m2
+      }
+    end
+
+  end
+
 end

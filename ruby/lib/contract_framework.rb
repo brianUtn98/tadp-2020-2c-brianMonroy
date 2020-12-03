@@ -26,9 +26,9 @@ module BeforeAndAfter
 
   @before = nil
   @after = nil
+  @ducked_array = nil
 
-
-    attr_reader :before , :after,:invariants
+  attr_reader :before , :after,:invariants
 
 
 
@@ -44,11 +44,23 @@ module BeforeAndAfter
 
     proc_after = after
 
+    proc_ducked_array = @ducked_array
+
     argumentos_sym = original_method.parameters.map{|unArg| unArg[1].to_s}
 
     add_decorated_method(sym,original_method)
     define_method(sym) do |*argumentos|
       context = Wrapper.new self
+
+      unless proc_ducked_array.nil?
+        esperados = proc_ducked_array.size
+        hallados = argumentos.size
+        raise "Se esperaban #{esperados} parametros y se hallaron #{hallados}" unless esperados.eql? hallados
+      end
+
+      proc_ducked_array&.each_with_index do |metodos,index|
+          raise "El parametro #{argumentos[index]} no entiende los mensajes #{metodos}" unless metodos.all? {|unMensaje| argumentos[index].respond_to? unMensaje}
+        end
       
       argumentos_sym.each_with_index do |arg,index|
         context.define_singleton_method(arg) do
@@ -83,7 +95,7 @@ module BeforeAndAfter
     end
     @before = nil
     @after = nil
-
+    @ducked_array = nil
     super # para que rubymine no se queje
   end
 
@@ -153,6 +165,15 @@ module BeforeAndAfter
     return if has_contract
 
     @has_contract = true
+  end
+
+  def duck *array
+    contract_class
+    @ducked_array = *array
+  end
+
+  def ducked_array
+    @ducked_array ||= nil
   end
 
 end
