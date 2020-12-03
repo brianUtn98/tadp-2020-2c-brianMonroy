@@ -126,18 +126,18 @@ class ProjectSpec extends AnyFlatSpec with should.Matchers {
   }
 
   it should "test * que anda con anychar" in {
-    AnyChar.*.apply("abcd") shouldBe Success(ResultadoParser(List('a','b','c','d'),""))
+    AnyChar.*().apply("abcd") shouldBe Success(ResultadoParser(List('a','b','c','d'),""))
   }
 
   it should "test * que anda con char" in {
-    char('a').*.apply("aacd") shouldBe Success(ResultadoParser(List('a','a'),"cd"))
+    char('a').*().apply("aacd") shouldBe Success(ResultadoParser(List('a','a'),"cd"))
   }
   it should "* deberia no parsear nada" in {
-    char('a').*.apply("") shouldBe Success(ResultadoParser(List(),""))
+    char('a').*().apply("") shouldBe Success(ResultadoParser(List(),""))
   }
 
   it should "* " in {
-    char('a').*.apply("bokita el + grande papa") shouldBe Success(ResultadoParser(List(),"bokita el + grande papa"))
+    char('a').*().apply("bokita el + grande papa") shouldBe Success(ResultadoParser(List(),"bokita el + grande papa"))
   }
 
 
@@ -395,6 +395,44 @@ class ProjectSpec extends AnyFlatSpec with should.Matchers {
 //    (string("hola") <~ string("mundo"))("testosterona").failure.exception shouldBe a[ConcatException]
 //  }
 
+}
+
+class TestIndividual extends AnyFlatSpec with should.Matchers{
+  it should "deberia parsera n veces" in {
+    string("hola").repetir(3)("holaholahola") shouldBe Success(ResultadoParser(List("hola","hola","hola"),""))
+  }
+
+  it should "deberia fallar si no parsea n veces" in {
+    string("hola").repetir(3)("holahola").failure.exception shouldBe a[SatisfiesException]
+  }
+
+  it should "deberia parsear n veces con sobrante" in {
+    string("hola").repetir(3)("holaholaholachau") shouldBe Success(ResultadoParser(List("hola","hola","hola"),"chau"))
+  }
+
+  it should "deberia fallar si no parsea un primero bien" in {
+    string("hola").repetir(3)("chauholaholahola").failure.exception shouldBe a[SatisfiesException]
+  }
+
+  it should "parsea solo las veces que se le pide" in {
+    string("hola").repetir(3)("holaholaholahola") shouldBe Success(ResultadoParser(List("hola","hola","hola"),"hola"))
+  }
+
+  it should "* parsea hasta n veces" in{
+    string("hola").*(3)("holaholaholahola") shouldBe Success(ResultadoParser(List("hola","hola","hola"),"hola"))
+  }
+
+  it should "* parsea menos veces" in{
+    string("hola").*(3)("holahola") shouldBe Success(ResultadoParser(List("hola","hola"),""))
+  }
+
+  it should "* parsea vacio" in{
+    string("hola").*(50)("") shouldBe Success(ResultadoParser(List(),""))
+  }
+
+  it should "* con 0 times se comporta como *" in {
+    AnyChar.*().apply("abcd") shouldBe Success(ResultadoParser(List('a','b','c','d'),""))
+  }
 }
 
 

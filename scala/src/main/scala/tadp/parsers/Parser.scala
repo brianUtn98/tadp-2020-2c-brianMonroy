@@ -31,8 +31,9 @@ abstract class Parser[T] {
 
 
 
-  def * ():Parser[List[T]] = {
+  def * (times:Int = 0):Parser[List[T]] = {
     val yo = this
+    var veces:Int = 1
     new Parser[List[T]] {
       override def apply(entrada: String): Try[ResultadoParser[List[T]]] = {
         Try {
@@ -43,13 +44,33 @@ abstract class Parser[T] {
       def armameLaLista[K](parser:Parser[T],entrada:String): ResultadoParser[List[T]] ={
         val resultado = parser.apply(entrada) match {
           case Success(ResultadoParser(parseado,sobranteAParsear)) =>
-            val ResultadoParser(parseadoNuevo,sobranteNuevo) = armameLaLista(parser, sobranteAParsear)
-            (parseado:: parseadoNuevo,sobranteNuevo)
+            if(veces < times || times.equals(0)){
+              veces = veces + 1
+              val ResultadoParser(parseadoNuevo,sobranteNuevo) = armameLaLista(parser, sobranteAParsear)
+              (parseado:: parseadoNuevo,sobranteNuevo)
+            } else{
+              val ResultadoParser(parseadoNuevo,_) = (armameLaLista(parser,""))
+              (parseado:: parseadoNuevo,sobranteAParsear)
+            }
           case Failure(_) => (List(),entrada)
         }
         ResultadoParser(resultado._1,resultado._2)
       }
     }
+  }
+
+  def repetir(times:Int): Parser[List[T]] ={
+    val yo = this
+    new Parser[List[T]] {
+      override def apply(entrada: String): Try[ResultadoParser[List[T]]] = {
+        yo.*(times).satisfies(this.estaNVeces).apply(entrada)
+      }
+      def estaNVeces(entrada: List[T]): Boolean ={
+        entrada.length.equals(times)
+      }
+    }
+
+
   }
 
   def +(): Parser[List[T]] = {
