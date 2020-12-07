@@ -21,7 +21,11 @@ class Wrapper
     end
 
   def respond_to_missing?(method_name, include_private = false)
-    wrappedObject.respond_to_missing? method_name
+    if wrappedObject.respond_to_missing? method_name
+      wrappedObject.respond_to_missing? method_name #redundante, podria devolver true pero no me gusta, prefiero repetir.
+    else
+      super
+    end
   end
 end
 
