@@ -121,3 +121,25 @@ class Operaciones
    end
 
 end
+
+class MultipleContracts
+
+  attr_accessor :operaciones_pendientes
+
+  def initialize
+    @operaciones_pendientes = 3
+  end
+
+  pre {num2 != 0}
+  pre {operaciones_pendientes > 0}
+  post { |result| result * num2 == num1}
+  post {operaciones_pendientes >= 0}
+  def dividir num1,num2
+    @operaciones_pendientes -= 1
+    num1/num2
+  end
+
+  def operaciones_pendientes
+    @operaciones_pendientes
+  end
+end

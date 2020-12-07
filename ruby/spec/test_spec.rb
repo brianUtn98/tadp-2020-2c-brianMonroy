@@ -146,4 +146,40 @@ end
     end
   end
 
+  describe "multiples contratos" do
+    it 'deberia fallar por primer pre' do
+      expect{
+        o = MultipleContracts.new
+        o.dividir 5,0
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia fallar por segundo pre' do
+      expect{
+        o = MultipleContracts.new
+        o.dividir 10,2
+        o.dividir 4,2
+        o.dividir 15,3
+
+        o.dividir 10,2
+      }.to raise_error(RuntimeError)
+    end
+
+    it 'deberia funcionar si se cumplen ambas pre' do
+      expect{
+        o = MultipleContracts.new
+        o.dividir 10,2
+        o.dividir 5,5
+        o.dividir 10,5
+      }.to_not raise_error
+    end
+
+    it 'deberia fallar por primer post' do
+      expect{
+        o = MultipleContracts.new
+        o.dividir 5,3
+      }.to raise_error(RuntimeError)
+    end
+  end
+
 end

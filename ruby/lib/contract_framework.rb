@@ -56,15 +56,19 @@ module BeforeAndAfter
         end
       end
       #puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
-      unless @before
-        raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&proc_before)
+      #unless @before
+        #raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&proc_before)
+        #end
+
+      unless proc_before.empty?
+        proc_before.each do |onePre|
+          raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&onePre)
+        end
       end
 
       resultado = original_method.bind(context.wrappedObject).call(*argumentos)
 
       self.class.invariants.each do |oneInvariant|
-        #puts "Evaluando invariant sobre #{context.wrappedObject}"
-        #puts "El wrapper es #{context}"
         raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_exec(&oneInvariant)
       end
 
@@ -74,15 +78,21 @@ module BeforeAndAfter
         end
       end
 
-      unless @after
-        raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
+      #unless @after
+        #raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
+        #end
+
+      unless proc_after.empty?
+        proc_after.each do |onePost|
+          raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&onePost)
+        end
       end
       resultado
 
 
     end
-    @before = nil
-    @after = nil
+    @before = []
+    @after = []
 
     super # para que rubymine no se queje
   end
@@ -100,12 +110,14 @@ module BeforeAndAfter
 
   def pre(&pre_condicion)
     contract_class
-    @before = pre_condicion
+    @before ||= []
+    @before << pre_condicion
   end
 
   def post(&post_condicion)
     contract_class
-    @after = post_condicion
+    @after ||= []
+    @after << post_condicion
   end
 
   def invariants
@@ -113,11 +125,11 @@ module BeforeAndAfter
   end
 
   def before
-    @before ||= proc { true }
+    @before ||= [proc { true }]
   end
 
   def after
-    @after ||= proc { true }
+    @after ||= [proc { true }]
   end
 
   def decorated_methods
