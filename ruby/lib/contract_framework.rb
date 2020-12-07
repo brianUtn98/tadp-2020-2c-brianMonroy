@@ -12,13 +12,16 @@ class Wrapper
   end
 
   private def method_missing(symbol, *args)
-    super unless wrappedObject.class.decorated_methods.has_key? symbol
+    if wrappedObject.class.decorated_methods.has_key? symbol
       metodo = wrappedObject.class.decorated_methods[symbol].bind(wrappedObject)
       metodo.call(*args)
+    else
+      super
     end
+  end
 
   def respond_to_missing?(method_name, include_private = false)
-    method_name.to_s.start_with?('user_') || super
+    wrappedObject.respond_to_missing?(method_name) || super
   end
 end
 
@@ -26,18 +29,14 @@ module BeforeAndAfter
 
   @before = nil
   @after = nil
-
-
+  
     attr_reader :before , :after,:invariants
-
-
 
   def method_added(sym)
 
     #retorno si es una clase del metamodelo, si el método ya fue decorado o si esta clase no tiene contratos.
     return if Class.ancestors.include? self or decorated_methods.has_key? sym or !@has_contract
 
-    #puts "Dentro de method added self es #{self}, agregando metodo #{sym}"
     original_method = self.instance_method(sym)
 
     proc_before = before
