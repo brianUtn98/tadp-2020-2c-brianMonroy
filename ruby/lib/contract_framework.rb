@@ -54,7 +54,7 @@ module BeforeAndAfter
           argumentos[index]
         end
       end
-      #puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
+
       unless @before
         raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&proc_before)
       end
@@ -62,8 +62,6 @@ module BeforeAndAfter
       resultado = original_method.bind(context.wrappedObject).call(*argumentos)
 
       self.class.invariants.each do |oneInvariant|
-        #puts "Evaluando invariant sobre #{context.wrappedObject}"
-        #puts "El wrapper es #{context}"
         raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_exec(&oneInvariant)
       end
 
@@ -77,7 +75,6 @@ module BeforeAndAfter
         raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
       end
       resultado
-
 
     end
     @before = nil
@@ -124,11 +121,8 @@ module BeforeAndAfter
   end
 
   def add_decorated_method sym,method
-    #puts "Entre al metodo add_decorated_method para el metodo #{sym}"
     @decored_methods ||= {}
     @decored_methods[sym] = method
-    #puts "Agregué el metodo #{sym} al hash"
-    #@decored_methods.push metodo_decorado
   end
 
   private def getters
@@ -150,7 +144,6 @@ module BeforeAndAfter
 
   def contract_class
     return if has_contract
-
     @has_contract = true
   end
 
