@@ -12,13 +12,16 @@ class Wrapper
   end
 
   private def method_missing(symbol, *args)
-    super unless wrappedObject.class.decorated_methods.has_key? symbol
+    if wrappedObject.class.decorated_methods.has_key? symbol
       metodo = wrappedObject.class.decorated_methods[symbol].bind(wrappedObject)
       metodo.call(*args)
+    else
+      super
+    end
     end
 
   def respond_to_missing?(method_name, include_private = false)
-    method_name.to_s.start_with?('user_') || super
+    wrappedObject.respond_to_missing? method_name
   end
 end
 
@@ -27,17 +30,12 @@ module BeforeAndAfter
   @before = nil
   @after = nil
 
-
     attr_reader :before , :after,:invariants
-
-
 
   def method_added(sym)
 
-    #retorno si es una clase del metamodelo, si el método ya fue decorado o si esta clase no tiene contratos.
     return if Class.ancestors.include? self or decorated_methods.has_key? sym or !@has_contract
 
-    #puts "Dentro de method added self es #{self}, agregando metodo #{sym}"
     original_method = self.instance_method(sym)
 
     proc_before = before
@@ -55,10 +53,6 @@ module BeforeAndAfter
           argumentos[index]
         end
       end
-      #puts "Dentro de define method self es una instancia de #{self.class}, defino metodo #{sym}"
-      #unless @before
-        #raise "Error de Pre-Condicion en #{self}:#{sym}" unless context.instance_eval(&proc_before)
-        #end
 
       unless proc_before.empty?
         proc_before.each do |onePre|
@@ -78,10 +72,6 @@ module BeforeAndAfter
         end
       end
 
-      #unless @after
-        #raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
-        #end
-
       unless proc_after.empty?
         proc_after.each do |onePost|
           raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&onePost)
@@ -93,7 +83,6 @@ module BeforeAndAfter
     end
     @before = []
     @after = []
-
     super # para que rubymine no se queje
   end
 
@@ -137,11 +126,8 @@ module BeforeAndAfter
   end
 
   def add_decorated_method sym,method
-    #puts "Entre al metodo add_decorated_method para el metodo #{sym}"
     @decored_methods ||= {}
     @decored_methods[sym] = method
-    #puts "Agregué el metodo #{sym} al hash"
-    #@decored_methods.push metodo_decorado
   end
 
   private def getters
