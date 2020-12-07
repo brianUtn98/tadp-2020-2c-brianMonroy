@@ -29,8 +29,8 @@ module BeforeAndAfter
 
   @before = nil
   @after = nil
-  
-    attr_reader :before , :after,:invariants
+
+  attr_reader :before, :after, :invariants
 
   def method_added(sym)
 
@@ -43,13 +43,13 @@ module BeforeAndAfter
 
     proc_after = after
 
-    argumentos_sym = original_method.parameters.map{|unArg| unArg[1].to_s}
+    argumentos_sym = original_method.parameters.map { |unArg| unArg[1].to_s }
 
-    add_decorated_method(sym,original_method)
+    add_decorated_method(sym, original_method)
     define_method(sym) do |*argumentos|
       context = Wrapper.new self
-      
-      argumentos_sym.each_with_index do |arg,index|
+
+      argumentos_sym.each_with_index do |arg, index|
         context.define_singleton_method(arg) do
           argumentos[index]
         end
@@ -65,14 +65,14 @@ module BeforeAndAfter
         raise "No se cumplio la invariante en #{context.wrappedObject}:#{sym}" unless context.wrappedObject.instance_exec(&oneInvariant)
       end
 
-      argumentos_sym.each_with_index do |arg,index|
+      argumentos_sym.each_with_index do |arg, index|
         context.define_singleton_method(arg) do
           argumentos[index]
         end
       end
 
       unless @after
-        raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado,&proc_after)
+        raise "Error de Post-Condicion en #{self}:#{sym}" unless context.instance_exec(resultado, &proc_after)
       end
       resultado
 
@@ -83,7 +83,7 @@ module BeforeAndAfter
     super # para que rubymine no se queje
   end
 
-  def before_and_after_each_call(before = proc{},after = proc{})
+  def before_and_after_each_call(before = proc {}, after = proc {})
     @before = before
     @after = after
   end
@@ -117,10 +117,10 @@ module BeforeAndAfter
   end
 
   def decorated_methods
-    @decored_methods ||={}
+    @decored_methods ||= {}
   end
 
-  def add_decorated_method sym,method
+  def add_decorated_method sym, method
     @decored_methods ||= {}
     @decored_methods[sym] = method
   end
